@@ -1,0 +1,23 @@
+{
+  "name": "JD 보드",
+  "short_name": "JD 보드",
+  "description": "채용공고 캡처를 올리면 마감일·지원자격·우대조건을 정리해 주는 개인용 공고 보드",
+  "start_url": "./",
+  "scope": "./",
+  "display": "standalone",
+  "background_color": "#f5f6f8",
+  "theme_color": "#1f3a5f",
+  "lang": "ko",
+  "icons": [
+    { "src": "icons/icon-192.png", "sizes": "192x192", "type": "image/png", "purpose": "any maskable" },
+    { "src": "icons/icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "any maskable" }
+  ],
+  "share_target": {
+    "action": "./share-target",
+    "method": "POST",
+    "enctype": "multipart/form-data",
+    "params": {
+      "files": [{ "name": "images", "accept": ["image/*"] }]
+    }
+  }
+}

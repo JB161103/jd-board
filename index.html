@@ -1,0 +1,146 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+  <meta name="theme-color" content="#1f3a5f" />
+  <title>JD 보드</title>
+  <link rel="manifest" href="manifest.json" />
+  <link rel="icon" href="icons/icon-192.png" />
+  <link rel="apple-touch-icon" href="icons/icon-192.png" />
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+  <!-- 상단 바 -->
+  <header class="topbar">
+    <div class="brand">
+      <span class="logo">JD</span>
+      <span id="siteTitle">JD 보드</span>
+    </div>
+    <div class="top-actions">
+      <button id="btnAdd" class="btn primary owner-only" type="button">+ 공고 추가</button>
+      <button id="btnSettings" class="btn ghost owner-only" type="button" title="설정">설정</button>
+      <button id="btnLogout" class="btn ghost owner-only" type="button">로그아웃</button>
+      <button id="btnLogin" class="btn ghost visitor-only" type="button">로그인</button>
+    </div>
+  </header>
+
+  <div id="demoBanner" class="demo-banner" hidden>
+    데모 모드입니다. 예시 공고만 보이며 저장되지 않습니다. config.js를 채우면 실제 사이트로 바뀝니다.
+  </div>
+
+  <main class="wrap">
+    <!-- 요약 -->
+    <section class="summary" id="summary"></section>
+
+    <!-- 검색·필터 -->
+    <section class="toolbar">
+      <input id="search" type="search" placeholder="회사명·직무·자격요건 검색" />
+      <select id="statusFilter" aria-label="상태 필터">
+        <option value="all">전체 상태</option>
+        <option value="검토 중">검토 중</option>
+        <option value="지원 예정">지원 예정</option>
+        <option value="지원 완료">지원 완료</option>
+        <option value="포기">포기</option>
+      </select>
+      <label class="check"><input id="hidePast" type="checkbox" /> 마감 지난 공고 숨기기</label>
+    </section>
+
+    <!-- PC: 표 형태 목록 -->
+    <section class="table-wrap">
+      <table class="list-table">
+        <thead>
+          <tr>
+            <th>마감</th><th>회사</th><th>직무</th><th>근무지</th><th>고용형태</th><th>상태</th>
+          </tr>
+        </thead>
+        <tbody id="tableBody"></tbody>
+      </table>
+    </section>
+
+    <!-- 휴대폰: 카드 형태 목록 -->
+    <section class="cards" id="cards"></section>
+
+    <p class="empty" id="empty" hidden>표시할 공고가 없습니다.</p>
+  </main>
+
+  <!-- 공고 상세 -->
+  <dialog id="detailDlg" class="dlg">
+    <div class="dlg-head">
+      <h2 id="detailTitle">공고 상세</h2>
+      <button class="btn ghost close" data-close type="button">닫기</button>
+    </div>
+    <div class="dlg-body" id="detailBody"></div>
+  </dialog>
+
+  <!-- 공고 추가: 캡처 업로드 -->
+  <dialog id="uploadDlg" class="dlg">
+    <div class="dlg-head">
+      <h2>공고 추가</h2>
+      <button class="btn ghost close" data-close type="button">닫기</button>
+    </div>
+    <div class="dlg-body">
+      <div id="dropZone" class="drop-zone" tabindex="0">
+        <p class="drop-main">JD 캡처를 끌어다 놓거나 <b>Ctrl+V</b>로 붙여넣으세요</p>
+        <p class="drop-sub">휴대폰: 아래 버튼으로 갤러리에서 선택하거나, 스크린샷을 ‘공유 → JD 보드’로 보내세요</p>
+        <label class="btn">이미지 선택<input id="fileInput" type="file" accept="image/*" multiple hidden /></label>
+      </div>
+      <div id="thumbs" class="thumbs"></div>
+      <div class="dlg-foot">
+        <span class="hint" id="uploadHint">긴 공고는 여러 장을 한 번에 올리면 한 공고로 묶입니다.</span>
+        <button id="btnManual" class="btn ghost" type="button">직접 입력</button>
+        <button id="btnExtract" class="btn primary" type="button" disabled>AI로 정리하기</button>
+      </div>
+    </div>
+  </dialog>
+
+  <!-- 확인·수정 -->
+  <dialog id="reviewDlg" class="dlg wide">
+    <div class="dlg-head">
+      <h2 id="reviewTitle">내용 확인 후 저장</h2>
+      <button class="btn ghost close" data-close type="button">닫기</button>
+    </div>
+    <div class="dlg-body review">
+      <div class="review-images" id="reviewImages"></div>
+      <form id="reviewForm" class="review-form" autocomplete="off"></form>
+    </div>
+  </dialog>
+
+  <!-- 로그인 -->
+  <dialog id="loginDlg" class="dlg small">
+    <div class="dlg-head">
+      <h2>관리자 로그인</h2>
+      <button class="btn ghost close" data-close type="button">닫기</button>
+    </div>
+    <form id="loginForm" class="dlg-body stack">
+      <label>이메일(아이디)<input name="email" type="email" required autocomplete="username" /></label>
+      <label>비밀번호<input name="password" type="password" required autocomplete="current-password" /></label>
+      <p class="error" id="loginError"></p>
+      <button class="btn primary" type="submit">로그인</button>
+    </form>
+  </dialog>
+
+  <!-- 설정 -->
+  <dialog id="settingsDlg" class="dlg small">
+    <div class="dlg-head">
+      <h2>설정</h2>
+      <button class="btn ghost close" data-close type="button">닫기</button>
+    </div>
+    <form id="settingsForm" class="dlg-body stack">
+      <label>Gemini API 키
+        <input name="gemini_key" type="password" placeholder="AIza... 로 시작" autocomplete="off" />
+      </label>
+      <label>AI 모델 이름
+        <input name="model" type="text" placeholder="gemini-3.5-flash-lite" />
+      </label>
+      <p class="hint">키는 본인 계정 전용 저장소에 보관되며 방문자에게는 보이지 않습니다. 모델 이름은 Google AI Studio에서 무료로 쓸 수 있는 이름을 그대로 복사해 넣으세요.</p>
+      <button class="btn primary" type="submit">저장</button>
+    </form>
+  </dialog>
+
+  <div id="toast" class="toast" hidden></div>
+
+  <script src="config.js"></script>
+  <script src="app.js"></script>
+</body>
+</html>
