@@ -8,6 +8,7 @@
 
 const CFG = window.APP_CONFIG || {};
 const DEMO = !CFG.SUPABASE_URL || !CFG.SUPABASE_ANON_KEY;
+const OPEN = !DEMO && CFG.OPEN_MODE === true; // 임시 공개 모드 (config.js)
 const params = new URLSearchParams(location.search);
 const DEFAULT_MODEL = "gemini-3.5-flash-lite";
 const BUCKET = "jd-images";
@@ -594,14 +595,19 @@ async function start() {
   const { createClient } = await import("https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/+esm");
   sb = createClient(CFG.SUPABASE_URL, CFG.SUPABASE_ANON_KEY);
   const { data } = await sb.auth.getSession();
-  state.owner = !!data.session;
+  state.owner = OPEN || !!data.session;
+  if (OPEN) {
+    $("#btnLogout").hidden = true;
+    $("#demoBanner").textContent = "과제 시연용 공개 모드입니다. 로그인 없이 누구나 공고를 추가·수정할 수 있습니다.";
+    $("#demoBanner").hidden = false;
+  }
   await load();
   if (state.owner) afterLogin();
   else if (params.get("shared") === "1") $("#loginDlg").showModal();
 
   sb.auth.onAuthStateChange(async (_ev, session) => {
     const was = state.owner;
-    state.owner = !!session;
+    state.owner = OPEN || !!session;
     if (was !== state.owner) { await load(); if (state.owner) afterLogin(); }
   });
 }

@@ -17,4 +17,9 @@ window.APP_CONFIG = {
 
   // 사이트 상단과 브라우저 탭에 보이는 이름
   SITE_TITLE: "JD 보드",
+
+  // 임시 공개 모드: true 이면 로그인 없이 누구나 추가·수정 가능
+  // (Supabase에서 open-mode.sql 도 실행해야 실제로 저장됩니다)
+  // 다시 닫을 때: false 로 바꾸고 close-mode.sql 실행
+  OPEN_MODE: true,
 };
