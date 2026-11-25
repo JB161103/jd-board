@@ -1,6 +1,6 @@
 // 휴대폰 '앱처럼 설치' + '공유 → JD 보드' 기능을 담당하는 파일입니다. 고칠 일은 거의 없습니다.
 const CACHE = "jd-shell-v1";
-const SHELL = ["./", "./index.html", "./style.css", "./app.js", "./config.js", "./manifest.json", "./icons/icon-192.png"];
+const SHELL = ["./", "./index.html", "./style.css", "./app.js", "./config.js", "./manifest.json", "./icon-192.png"];
 const scoped = (p) => new URL(p, self.registration.scope).href;
 
 self.addEventListener("install", (e) => {
